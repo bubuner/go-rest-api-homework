@@ -51,7 +51,11 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+
+	if err != nil {
+		fmt.Println("Ошибка при формировании ответа")
+	}
 }
 
 func createTask(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +71,13 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, ok := tasks[task.ID]
+
+	if ok {
+		http.Error(w, "Ошибка при попытка перезаписать задачу", http.StatusBadRequest)
 		return
 	}
 
@@ -87,13 +98,17 @@ func getTaskById(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := json.Marshal(task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+
+	if err != nil {
+		fmt.Println("Ошибка при формировании ответа")
+	}
 }
 
 func deleteTask(w http.ResponseWriter, r *http.Request) {
